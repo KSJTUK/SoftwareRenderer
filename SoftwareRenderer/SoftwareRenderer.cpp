@@ -26,6 +26,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(lpCmdLine);
 
     // TODO: 여기에 코드를 입력합니다.
+    MSG msg;
+    HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_SOFTWARERENDERER));
 
     // 전역 문자열을 초기화합니다.
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
@@ -33,29 +35,25 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     MyRegisterClass(hInstance);
 
     // 애플리케이션 초기화를 수행합니다:
-    if (!InitInstance (hInstance, nCmdShow))
-    {
+    if (!InitInstance (hInstance, nCmdShow)) {
         return FALSE;
     }
 
-    HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_SOFTWARERENDERER));
-
-    MSG msg;
-
     // 기본 메시지 루프입니다:
-    while (GetMessage(&msg, nullptr, 0, 0))
-    {
-        if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
-        {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
+    while (true) {
+        if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+            if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg)) {
+                TranslateMessage(&msg);
+                DispatchMessage(&msg);
+            }
+        }
+        else {
+
         }
     }
 
     return (int) msg.wParam;
 }
-
-
 
 //
 //  함수: MyRegisterClass()
@@ -76,11 +74,11 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_SOFTWARERENDERER));
     wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW);
     wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
-    wcex.lpszMenuName   = MAKEINTRESOURCEW(IDC_SOFTWARERENDERER);
+    wcex.lpszMenuName   = NULL;
     wcex.lpszClassName  = szWindowClass;
     wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 
-    return RegisterClassExW(&wcex);
+    return RegisterClassEx(&wcex);
 }
 
 //
@@ -95,20 +93,21 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 //
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
-   hInst = hInstance; // 인스턴스 핸들을 전역 변수에 저장합니다.
+    hInst = hInstance; // 인스턴스 핸들을 전역 변수에 저장합니다.
 
-   HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
+    RECT rc = { 0, 0, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT };
+    DWORD dwStyle = WS_OVERLAPPED | WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU | WS_BORDER;
+    AdjustWindowRect(&rc, dwStyle, FALSE);
+    HWND hMainWnd = CreateWindow(szWindowClass, szTitle, dwStyle, CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, NULL, NULL, hInstance, NULL);
 
-   if (!hWnd)
-   {
-      return FALSE;
-   }
+    if (!hMainWnd) return(FALSE);
 
-   ShowWindow(hWnd, nCmdShow);
-   UpdateWindow(hWnd);
+    //gGameFramework.OnCreate(hInstance, hMainWnd);
 
-   return TRUE;
+    ShowWindow(hMainWnd, nCmdShow);
+    UpdateWindow(hMainWnd);
+
+    return TRUE;
 }
 
 //
@@ -123,39 +122,52 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    switch (message)
-    {
+    int wmId, wmEvent;
+    PAINTSTRUCT ps;
+    HDC hdc;
+
+    switch (message) {
+    case WM_SIZE:
+    case WM_LBUTTONDOWN:
+    case WM_LBUTTONUP:
+    case WM_RBUTTONDOWN:
+    case WM_RBUTTONUP:
+    case WM_MOUSEMOVE:
+    case WM_KEYDOWN:
+    case WM_KEYUP:
+        //gGameFramework.OnProcessingWindowMessage(hWnd, message, wParam, lParam);
+        break;
+
     case WM_COMMAND:
-        {
-            int wmId = LOWORD(wParam);
-            // 메뉴 선택을 구문 분석합니다:
-            switch (wmId)
-            {
-            case IDM_ABOUT:
-                DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
-                break;
-            case IDM_EXIT:
-                DestroyWindow(hWnd);
-                break;
-            default:
-                return DefWindowProc(hWnd, message, wParam, lParam);
-            }
+        wmId = LOWORD(wParam);
+        wmEvent = HIWORD(wParam);
+        // 메뉴의 선택 영역을 구문 분석합니다.
+        switch (wmId) {
+        case IDM_ABOUT:
+            DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+            break;
+        case IDM_EXIT:
+            DestroyWindow(hWnd);
+            break;
+        default:
+            return DefWindowProc(hWnd, message, wParam, lParam);
         }
         break;
+
     case WM_PAINT:
-        {
-            PAINTSTRUCT ps;
-            HDC hdc = BeginPaint(hWnd, &ps);
-            // TODO: 여기에 hdc를 사용하는 그리기 코드를 추가합니다...
-            EndPaint(hWnd, &ps);
-        }
+        hdc = BeginPaint(hWnd, &ps);
+        // TODO: 여기에 그리기 코드를 추가합니다.
+        EndPaint(hWnd, &ps);
         break;
+
     case WM_DESTROY:
         PostQuitMessage(0);
         break;
+
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);
     }
+
     return 0;
 }
 
@@ -163,14 +175,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
     UNREFERENCED_PARAMETER(lParam);
-    switch (message)
-    {
+    switch (message) {
     case WM_INITDIALOG:
         return (INT_PTR)TRUE;
 
     case WM_COMMAND:
-        if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
-        {
+        if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL) {
             EndDialog(hDlg, LOWORD(wParam));
             return (INT_PTR)TRUE;
         }
