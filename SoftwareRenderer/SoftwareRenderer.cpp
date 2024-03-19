@@ -1,8 +1,9 @@
 ﻿// SoftwareRenderer.cpp : 애플리케이션에 대한 진입점을 정의합니다.
 //
 
-#include "framework.h"
+#include "pch.h"
 #include "SoftwareRenderer.h"
+#include "GameFramework.h"
 
 #define MAX_LOADSTRING 100
 
@@ -10,6 +11,8 @@
 HINSTANCE hInst;                                // 현재 인스턴스입니다.
 WCHAR szTitle[MAX_LOADSTRING];                  // 제목 표시줄 텍스트입니다.
 WCHAR szWindowClass[MAX_LOADSTRING];            // 기본 창 클래스 이름입니다.
+
+GameFramework gGameFramework;
 
 // 이 코드 모듈에 포함된 함수의 선언을 전달합니다:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -27,11 +30,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     // TODO: 여기에 코드를 입력합니다.
     MSG msg;
-    HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_SOFTWARERENDERER));
 
     // 전역 문자열을 초기화합니다.
-    LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
-    LoadStringW(hInstance, IDC_SOFTWARERENDERER, szWindowClass, MAX_LOADSTRING);
+    LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
+    LoadString(hInstance, IDC_SOFTWARERENDERER, szWindowClass, MAX_LOADSTRING);
     MyRegisterClass(hInstance);
 
     // 애플리케이션 초기화를 수행합니다:
@@ -39,20 +41,27 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         return FALSE;
     }
 
+    HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_SOFTWARERENDERER));
+
     // 기본 메시지 루프입니다:
     while (true) {
         if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+            if (msg.message == WM_QUIT) {
+                break;
+            }
+
             if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg)) {
                 TranslateMessage(&msg);
                 DispatchMessage(&msg);
             }
         }
         else {
-
+            gGameFramework.FrameAdvance();
         }
     }
+    gGameFramework.OnDesroy();
 
-    return (int) msg.wParam;
+    return (int)msg.wParam;
 }
 
 //
@@ -98,14 +107,16 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
     RECT rc = { 0, 0, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT };
     DWORD dwStyle = WS_OVERLAPPED | WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU | WS_BORDER;
     AdjustWindowRect(&rc, dwStyle, FALSE);
-    HWND hMainWnd = CreateWindow(szWindowClass, szTitle, dwStyle, CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, NULL, NULL, hInstance, NULL);
+    HWND hMainWnd = CreateWindow(szWindowClass, szTitle, dwStyle, CW_USEDEFAULT, 
+        CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, NULL, NULL, hInstance, NULL);
 
-    if (!hMainWnd) return(FALSE);
+    if (!hMainWnd) 
+        return(FALSE);
 
-    //gGameFramework.OnCreate(hInstance, hMainWnd);
+    gGameFramework.OnCreate(hInstance, hMainWnd);
 
-    ShowWindow(hMainWnd, nCmdShow);
-    UpdateWindow(hMainWnd);
+    ::ShowWindow(hMainWnd, nCmdShow);
+    ::UpdateWindow(hMainWnd);
 
     return TRUE;
 }
@@ -122,9 +133,9 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    int wmId, wmEvent;
-    PAINTSTRUCT ps;
-    HDC hdc;
+    int wmId{ }, wmEvent{ };
+    PAINTSTRUCT ps{ };
+    HDC hdc{ };
 
     switch (message) {
     case WM_SIZE:
@@ -135,7 +146,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_MOUSEMOVE:
     case WM_KEYDOWN:
     case WM_KEYUP:
-        //gGameFramework.OnProcessingWindowMessage(hWnd, message, wParam, lParam);
+        gGameFramework.OnProcessingWindowMessage(hWnd, message, wParam, lParam);
         break;
 
     case WM_COMMAND:
