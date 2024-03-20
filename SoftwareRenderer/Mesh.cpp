@@ -36,7 +36,7 @@ void Mesh::SetPolygon(size_t index, Poly* polygon) {
 	m_polygons[index] = polygon;
 }
 
-void Mesh::Render(HDC hDCFrameBuffer) {
+void Mesh::Render(const HDC hDCFrameBuffer) {
 	DirectX::XMFLOAT3 initProject{ }, prevProject{ };
 	bool prevInside = false, initInside = false, curInside = false, intersectInside = false;
 
@@ -62,17 +62,51 @@ void Mesh::Render(HDC hDCFrameBuffer) {
 	}
 }
 
-TestSimpleRectMesh::TestSimpleRectMesh(float width, float height) : Mesh{ 1 } {
-	float fHalfWidth = width * 0.5f;
-	float fHalfHeight = height * 0.5f;
+// ----------------------------------------------------------------------------------------------
+CubeMesh::CubeMesh(float fWidth, float fHeight, float fDepth) : Mesh(6) {
+	float fHalfWidth = fWidth * 0.5f;
+	float fHalfHeight = fHeight * 0.5f;
+	float fHalfDepth = fDepth * 0.5f;
 
-	Poly* frontFace = new Poly{ 4 };
-	frontFace->SetVertex(0, Vertex{ { -fHalfWidth, +fHalfHeight, 5.f } });
-	frontFace->SetVertex(1, Vertex{ { +fHalfWidth, +fHalfHeight, 5.f } });
-	frontFace->SetVertex(2, Vertex{ { +fHalfWidth, -fHalfHeight, 5.f } });
-	frontFace->SetVertex(3, Vertex{ { -fHalfWidth, -fHalfHeight, 5.f } });
-	SetPolygon(0, frontFace);
-}
+	Poly* pFrontFace = new Poly(4);
+	pFrontFace->SetVertex(0, Vertex(-fHalfWidth, +fHalfHeight, -fHalfDepth));
+	pFrontFace->SetVertex(1, Vertex(+fHalfWidth, +fHalfHeight, -fHalfDepth));
+	pFrontFace->SetVertex(2, Vertex(+fHalfWidth, -fHalfHeight, -fHalfDepth));
+	pFrontFace->SetVertex(3, Vertex(-fHalfWidth, -fHalfHeight, -fHalfDepth));
+	SetPolygon(0, pFrontFace);
 
-TestSimpleRectMesh::~TestSimpleRectMesh() {
+	Poly* pTopFace = new Poly(4);
+	pTopFace->SetVertex(0, Vertex(-fHalfWidth, +fHalfHeight, +fHalfDepth));
+	pTopFace->SetVertex(1, Vertex(+fHalfWidth, +fHalfHeight, +fHalfDepth));
+	pTopFace->SetVertex(2, Vertex(+fHalfWidth, +fHalfHeight, -fHalfDepth));
+	pTopFace->SetVertex(3, Vertex(-fHalfWidth, +fHalfHeight, -fHalfDepth));
+	SetPolygon(1, pTopFace);
+
+	Poly* pBackFace = new Poly(4);
+	pBackFace->SetVertex(0, Vertex(-fHalfWidth, -fHalfHeight, +fHalfDepth));
+	pBackFace->SetVertex(1, Vertex(+fHalfWidth, -fHalfHeight, +fHalfDepth));
+	pBackFace->SetVertex(2, Vertex(+fHalfWidth, +fHalfHeight, +fHalfDepth));
+	pBackFace->SetVertex(3, Vertex(-fHalfWidth, +fHalfHeight, +fHalfDepth));
+	SetPolygon(2, pBackFace);
+
+	Poly* pBottomFace = new Poly(4);
+	pBottomFace->SetVertex(0, Vertex(-fHalfWidth, -fHalfHeight, -fHalfDepth));
+	pBottomFace->SetVertex(1, Vertex(+fHalfWidth, -fHalfHeight, -fHalfDepth));
+	pBottomFace->SetVertex(2, Vertex(+fHalfWidth, -fHalfHeight, +fHalfDepth));
+	pBottomFace->SetVertex(3, Vertex(-fHalfWidth, -fHalfHeight, +fHalfDepth));
+	SetPolygon(3, pBottomFace);
+
+	Poly* pLeftFace = new Poly(4);
+	pLeftFace->SetVertex(0, Vertex(-fHalfWidth, +fHalfHeight, +fHalfDepth));
+	pLeftFace->SetVertex(1, Vertex(-fHalfWidth, +fHalfHeight, -fHalfDepth));
+	pLeftFace->SetVertex(2, Vertex(-fHalfWidth, -fHalfHeight, -fHalfDepth));
+	pLeftFace->SetVertex(3, Vertex(-fHalfWidth, -fHalfHeight, +fHalfDepth));
+	SetPolygon(4, pLeftFace);
+
+	Poly* pRightFace = new Poly(4);
+	pRightFace->SetVertex(0, Vertex(+fHalfWidth, +fHalfHeight, -fHalfDepth));
+	pRightFace->SetVertex(1, Vertex(+fHalfWidth, +fHalfHeight, +fHalfDepth));
+	pRightFace->SetVertex(2, Vertex(+fHalfWidth, -fHalfHeight, +fHalfDepth));
+	pRightFace->SetVertex(3, Vertex(+fHalfWidth, -fHalfHeight, -fHalfDepth));
+	SetPolygon(5, pRightFace);
 }

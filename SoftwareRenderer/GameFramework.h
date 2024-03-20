@@ -32,6 +32,8 @@ private:
 	HBITMAP		m_hBmpFrameBuffer{ nullptr };
 
 	std::unique_ptr<class Timer> m_timer{ };
-	std::unique_ptr<class TestSimpleRectMesh> m_renderingTestMesh{ };
+	std::shared_ptr<class CubeMesh> m_cubeMesh{ };
 	std::unique_ptr<class Camera> m_mainCamera{ };
+
+	std::unique_ptr<class GameObject> m_gameObjects{ };
 };

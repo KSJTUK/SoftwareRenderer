@@ -11,7 +11,7 @@ private:
 public:
 	void SetPolygon(size_t index, class Poly* polygon);
 
-	virtual void Render(HDC hDCFrameBuffer);
+	virtual void Render(const HDC hDCFrameBuffer);
 
 private:
 	size_t m_nPolygons{ };
@@ -19,8 +19,8 @@ private:
 };
 
 // --------------------------------------------------------------------------------------
-class TestSimpleRectMesh : public Mesh {
+class CubeMesh : public Mesh {
 public:
-	TestSimpleRectMesh(float width=4.0f, float height=4.0f);
-	~TestSimpleRectMesh();
+	CubeMesh(float fWidth = 4.0f, float fHeight = 4.0f, float fDepth = 4.0f);
+	virtual ~CubeMesh() { }
 };

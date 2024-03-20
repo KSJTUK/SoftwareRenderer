@@ -4,6 +4,7 @@
 #include "Mesh.h"
 #include "Camera.h"
 #include "GraphicsPipeline.h"
+#include "GameObject.h"
 
 GameFramework::GameFramework() { }
 
@@ -26,11 +27,14 @@ void GameFramework::OnDesroy() {
 
 void GameFramework::BuildObjects() {
 	m_timer = std::make_unique<Timer>();
-	m_renderingTestMesh = std::make_unique<TestSimpleRectMesh>();
+	m_cubeMesh = std::make_shared<CubeMesh>(2.f, 2.f, 2.f);
+
 	m_mainCamera = std::make_unique<Camera>();
 	m_mainCamera->SetViewport(0, 0, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
 	m_mainCamera->GeneratePerspectiveProjectionMatrix(1.0f, 500.f, 60.0f);
 	m_mainCamera->SetFOVAngle(60.0f);
+
+	m_gameObjects = std::make_unique<GameObject>(m_cubeMesh);
 }
 
 void GameFramework::ProcessInput() {
@@ -140,25 +144,16 @@ void GameFramework::FrameAdvance() {
 
 	ClearFrameBuffer(RGB(90, 103, 224));
 
+	m_mainCamera->Move({ 0.f, 0.f, -0.001f });
+	m_mainCamera->Rotate(0.f, 0.f, 0.f);
+
+	m_mainCamera->GenerateViewMatrix();
+	GraphicsPipeline::SetViewport(std::addressof(m_mainCamera->m_viewport));
+	GraphicsPipeline::SetViewPerspectiveProjectTransform(std::addressof(m_mainCamera->m_viewPerspectiveProject));
+
 	// Rendering Code
 	// Mesh Rendering Test
-
-	m_mainCamera->Move(DirectX::XMFLOAT3{ 0.f, 0.f, 0.001f });
-	m_mainCamera->Rotate(0.f, 0.f, 0.02f);
-	m_mainCamera->GenerateViewMatrix();
-
-	DirectX::XMFLOAT4X4 w{ Matrix4x4::Identity() };
-	GraphicsPipeline::SetWorldTransform(&w);
-	GraphicsPipeline::SetViewport(&m_mainCamera->m_viewport);
-	GraphicsPipeline::SetViewPerspectiveProjectTransform(&m_mainCamera->m_viewPerspectiveProject);
-
-	HPEN hPen = ::CreatePen(PS_SOLID, 0, RGB(0xff, 0xff, 0x00));
-	HPEN hOldPen = (HPEN)::SelectObject(m_hDCFrameBuffer, hPen);
-
-	m_renderingTestMesh->Render(m_hDCFrameBuffer);
-
-	::SelectObject(m_hDCFrameBuffer, hOldPen);
-	::DeleteObject(hPen);
+	m_gameObjects->Render(m_hDCFrameBuffer);
 
 	PresentFrameBuffer();
 
