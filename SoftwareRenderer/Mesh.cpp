@@ -67,10 +67,10 @@ TestSimpleRectMesh::TestSimpleRectMesh(float width, float height) : Mesh{ 1 } {
 	float fHalfHeight = height * 0.5f;
 
 	Poly* frontFace = new Poly{ 4 };
-	frontFace->SetVertex(0, Vertex{ { -fHalfWidth, +fHalfHeight, -5.f } });
-	frontFace->SetVertex(1, Vertex{ { +fHalfWidth, +fHalfHeight, -5.f } });
-	frontFace->SetVertex(2, Vertex{ { +fHalfWidth, -fHalfHeight, -5.f } });
-	frontFace->SetVertex(3, Vertex{ { -fHalfWidth, -fHalfHeight, -5.f } });
+	frontFace->SetVertex(0, Vertex{ { -fHalfWidth, +fHalfHeight, 5.f } });
+	frontFace->SetVertex(1, Vertex{ { +fHalfWidth, +fHalfHeight, 5.f } });
+	frontFace->SetVertex(2, Vertex{ { +fHalfWidth, -fHalfHeight, 5.f } });
+	frontFace->SetVertex(3, Vertex{ { -fHalfWidth, -fHalfHeight, 5.f } });
 	SetPolygon(0, frontFace);
 }
 

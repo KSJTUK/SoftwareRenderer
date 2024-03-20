@@ -29,3 +29,13 @@ namespace Matrix4x4 {
 		return rtMatrix;
 	}
 }
+
+namespace Float3 {
+	inline DirectX::XMFLOAT3 RotateVec3Axis(const DirectX::XMFLOAT3& axis, DirectX::XMFLOAT3& point, float angleDegree)
+	{
+		/*if (!IsZero(angleDegree)) {
+			DirectX::XMMATRIX matrixRotate{ DirectX::XMMatrixRotationAxis(DirectX::XMLoadFloat3(&axis), DirectX::XMConvertToRadians(angleDegree)) };
+			DirectX::XMStoreFloat3(std::addressof, )
+		}*/
+	}
+}

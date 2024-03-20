@@ -33,5 +33,5 @@ private:
 
 	std::unique_ptr<class Timer> m_timer{ };
 	std::unique_ptr<class TestSimpleRectMesh> m_renderingTestMesh{ };
-	std::unique_ptr<class Camera> m_testCamera{ };
+	std::unique_ptr<class Camera> m_mainCamera{ };
 };

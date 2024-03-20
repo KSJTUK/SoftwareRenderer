@@ -22,10 +22,10 @@ DirectX::XMFLOAT3 GraphicsPipeline::ScreenTransform(DirectX::XMFLOAT3& project) 
 }
 
 DirectX::XMFLOAT3 GraphicsPipeline::Project(DirectX::XMFLOAT3& model) {
-	DirectX::XMMATRIX modelToProject = DirectX::XMMatrixMultiply(DirectX::XMLoadFloat4x4(m_world), DirectX::XMLoadFloat4x4(m_viewProjection));
+	DirectX::XMMATRIX modelToProject{ DirectX::XMMatrixMultiply(DirectX::XMLoadFloat4x4(m_world), DirectX::XMLoadFloat4x4(m_viewProjection)) };
 	DirectX::XMFLOAT3 project{ };
 
-	XMStoreFloat3(&project, DirectX::XMVector3TransformCoord(DirectX::XMLoadFloat3(&model), modelToProject));
+	DirectX::XMStoreFloat3(&project, DirectX::XMVector3TransformCoord(DirectX::XMLoadFloat3(&model), modelToProject));
 
 	return project;
 }

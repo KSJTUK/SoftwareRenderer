@@ -27,7 +27,7 @@ public:
 	void SetLookAt(DirectX::XMFLOAT3& position, DirectX::XMFLOAT3& lookAt, DirectX::XMFLOAT3& up);
 	void SetLookAt(DirectX::XMFLOAT3& lookAt, DirectX::XMFLOAT3& up);
 
-	void Move(DirectX::XMFLOAT3& shift);
+	void Move(const DirectX::XMFLOAT3& shift);
 	void Move(float x, float y, float z);
 	void Rotate(float pitch = 0.0f, float yaw = 0.0f, float roll = 0.0f);
 	//void Update(Player* player, DirectX::XMFLOAT3& lookAt, float timeElapsed = 0.016f);
