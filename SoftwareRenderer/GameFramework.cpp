@@ -1,15 +1,38 @@
 #include "pch.h"
 #include "GameFramework.h"
+#include "Timer.h"
+#include "Mesh.h"
+#include "Camera.h"
+#include "GraphicsPipeline.h"
+
+GameFramework::GameFramework() { }
+
+GameFramework::~GameFramework() { }
 
 void GameFramework::OnCreate(HINSTANCE hInst, HWND hWnd) {
 	m_hInstance = hInst;
 	m_hWnd = hWnd;
 
 	CreateFrameBuffers();
+	BuildObjects();
 }
 
 void GameFramework::OnDesroy() {
 	// Release Objects
+	if (m_hBmpFrameBuffer) ::DeleteObject(m_hBmpFrameBuffer);
+	if (m_hDCFrameBuffer) ::DeleteDC(m_hDCFrameBuffer);
+	::ReleaseDC(m_hWnd, m_hDCPrimary);
+}
+
+void GameFramework::BuildObjects() {
+	m_timer = std::make_unique<Timer>();
+	m_renderingTestMesh = std::make_unique<TestSimpleRectMesh>();
+	m_testCamera = std::make_unique<Camera>();
+	m_testCamera->SetViewport(0, 0, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
+	m_testCamera->GeneratePerspectiveProjectionMatrix(1.0f, 500.f, 60.0f);
+	m_testCamera->SetFOVAngle(60.0f);
+	
+	m_testCamera->GenerateViewMatrix();
 }
 
 void GameFramework::ProcessInput() {
@@ -80,13 +103,13 @@ LRESULT CALLBACK GameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMessa
 void GameFramework::CreateFrameBuffers() {
 	::GetClientRect(m_hWnd, &m_rcClient);
 
-	HDC hDC{ ::GetDC(m_hWnd) };
-
-	m_hDCFrameBuffer = ::CreateCompatibleDC(hDC);
-	m_hBmpFrameBuffer = ::CreateCompatibleBitmap(hDC, m_rcClient.right - m_rcClient.left, m_rcClient.bottom - m_rcClient.top);
+	//HDC hDC{ ::GetDC(m_hWnd) };
+	m_hDCPrimary = ::GetDC(m_hWnd);
+	m_hDCFrameBuffer = ::CreateCompatibleDC(m_hDCPrimary);
+	m_hBmpFrameBuffer = ::CreateCompatibleBitmap(m_hDCPrimary, m_rcClient.right - m_rcClient.left, m_rcClient.bottom - m_rcClient.top);
 	::SelectObject(m_hDCFrameBuffer, m_hBmpFrameBuffer);
 
-	::ReleaseDC(m_hWnd, hDC);
+	//::ReleaseDC(m_hWnd, hDC);
 	::SetBkMode(m_hDCFrameBuffer, TRANSPARENT);
 }
 
@@ -113,18 +136,30 @@ void GameFramework::PresentFrameBuffer() {
 }
 
 void GameFramework::FrameAdvance() {
+	m_timer->Tick(0.0f); // 0.0f is no limits
+	
 	ProcessInput();
 
 	ClearFrameBuffer(RGB(90, 103, 224));
 
-	HPEN hPen = ::CreatePen(PS_SOLID, 0, RGB(0x00, 0xff, 0x00));
+	// Rendering Code
+	// Mesh Rendering Test
+	DirectX::XMFLOAT4X4 w{ Matrix4x4::Identity() };
+	GraphicsPipeline::SetWorldTransform(&w);
+	GraphicsPipeline::SetViewport(&m_testCamera->m_viewport);
+	GraphicsPipeline::SetViewPerspectiveProjectTransform(&m_testCamera->m_viewPerspectiveProject);
+
+	HPEN hPen = ::CreatePen(PS_SOLID, 0, RGB(0xff, 0xff, 0x00));
 	HPEN hOldPen = (HPEN)::SelectObject(m_hDCFrameBuffer, hPen);
 
-	::MoveToEx(m_hDCFrameBuffer, 100, 100, NULL);
-	::LineTo(m_hDCFrameBuffer, 400, 400);
+	m_renderingTestMesh->Render(m_hDCFrameBuffer);
 
 	::SelectObject(m_hDCFrameBuffer, hOldPen);
 	::DeleteObject(hPen);
 
 	PresentFrameBuffer();
+
+	std::wstring testWindowText{ };
+	m_timer->GetFrameRate(testWindowText);
+	::SetWindowText(m_hWnd, testWindowText.c_str());
 }

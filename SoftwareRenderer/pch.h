@@ -5,14 +5,18 @@
 // Windows 헤더 파일
 #include <windows.h>
 // C 런타임 헤더 파일입니다.
-#include <stdlib.h>
 #include <malloc.h>
 #include <memory.h>
 #include <tchar.h>
-#include <math.h>
 
-#include <Mmsystem.h>
-#pragma comment(lib, "winmm.lib")
+#include <DirectXMath.h>
+#include <cmath>
+#include <cstdlib>
+
+#include <array>
+#include <memory>
+#include <string>
+#include "Utils.h"
 
 #define FRAMEBUFFER_WIDTH		640
 #define FRAMEBUFFER_HEIGHT		480
@@ -23,5 +27,5 @@
 
 #define EPSILON					1.0e-2f
 
-inline bool IsZero(float fValue) { return((fabsf(fValue) <= EPSILON)); }
+inline bool IsZero(float fValue) { return((std::fabsf(fValue) <= EPSILON)); }
 inline bool IsEqual(float fA, float fB) { return(::IsZero(fA - fB)); }
